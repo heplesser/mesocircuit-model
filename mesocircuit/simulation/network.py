@@ -315,12 +315,18 @@ class Network:
         for i, (label, pop) in enumerate(zip(self.net_dict['populations'],
 
                                              self.pops)):
-            # extract layer nodes and positions on this RANK
-            nodes = nest.GetLocalNodeCollection(pop)
-            if len(nodes) > 1:
-                pos = np.array(nest.GetPosition(nodes))
-            elif len(nodes) == 1:
-                pos = np.array(nest.GetPosition(nodes)).reshape((1, 2))
+            # As a work-around to NEST #3706, we extract node IDs and position information separately.
+            # The spatial position as those of the local nodes only and have the same ordering as
+            # the global ids.
+            node_ids = pop[pop.local].global_id
+            node_pos = pop.spatial["positions"]
+            n_local = len(node_ids)
+            assert len(node_pos) == n_local, f"Node IDs and positions arrays have different lengths ({n_local} vs {len(node_pos)})"
+            
+            if n_local > 1:
+                pos = np.array(node_pos)
+            elif n_local == 1:
+                pos = np.array(node_pos).reshape((1, 2))
             else:
                 pos = np.zeros((0, 2))
 
@@ -330,8 +336,8 @@ class Network:
             formats = ['i4', 'f8', 'f8']
 
             # construct record array
-            data = np.recarray((len(nodes), ), names=names, formats=formats)
-            data['nodeid'] = nodes
+            data = np.recarray((n_local, ), names=names, formats=formats)
+            data['nodeid'] = node_ids
             data['x-position_mm'] = pos[:, 0]
             data['y-position_mm'] = pos[:, 1]
 
