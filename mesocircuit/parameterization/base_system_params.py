@@ -89,7 +89,7 @@ sys_dict = {
             # number of threads per MPI process
             # if 'auto', the number of threads is set such that the total
             # number of virtual processes equals the number of physical cores
-            'local_num_threads': 'auto'},
+            'local_num_threads': 4}, # 'auto'},
         'analysis_and_plotting': {
             # '$(nproc)' gives the number of available logical cores
             'num_mpi': ('$(sysctl -n hw.physicalcpu)'

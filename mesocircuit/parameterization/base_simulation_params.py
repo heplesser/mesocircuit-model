@@ -24,9 +24,9 @@ sim_dict = {
     # presimulation time (in ms)
     # a good choice for consistency is to choose it equal to
     # ana_dict['t_transient'] for ignoring the spikes during analysis
-    't_presim': 1000.0,
+    't_presim': 0.0,
     # simulation time (in ms)
-    't_sim': 1000.0,
+    't_sim': 0.0,
     # resolution of the simulation (in ms)
     'sim_resolution': 0.1,
 

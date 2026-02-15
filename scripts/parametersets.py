@@ -8,7 +8,7 @@ parameters.
 import numpy as np
 
 local_sim_dict = {
-    'print_time': True}
+    'print_time': False}
 
 ### model-specific definitions ###
 
@@ -70,8 +70,8 @@ ps_dicts = {
         },
         'net_dict': {
             **net_dict_mesocircuit_MAMV1,
-            'N_scaling': 0.005,
-            'K_scaling': 0.5,
+            'N_scaling': 0.05, # 0.005,
+            'K_scaling': 1, #0.5,
         },
     },
 
