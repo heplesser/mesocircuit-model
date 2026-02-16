@@ -528,8 +528,8 @@ class Mesocircuit():
             # local_num_threads for network simulation
             t = str(sys_dict[machine]['network']['local_num_threads'])
 
-            LFP_cells = self._get_LFP_cell_type_names(path)
-            lfp_arg = [c + ' ' + a for c in LFP_cells]
+            #LFP_cells = self._get_LFP_cell_type_names(path)
+            #lfp_arg = [c + ' ' + a for c in LFP_cells]
 
             for name, scripts, scriptargs in [
                 ['network', ['run_network.py'], [t + ' ' + a]],
@@ -537,14 +537,15 @@ class Mesocircuit():
                 ['plotting', ['run_plotting.py'], [a]],
                 ['analysis_and_plotting', ['run_analysis.py',
                                            'run_plotting.py'], [a] * 2],
-                ['lfp_simulation', ['run_lfp_simulation.py']
-                 * len(LFP_cells), lfp_arg],
-                ['lfp_postprocess', ['run_lfp_postprocess.py'], [a]],
-                    ['lfp_plotting', ['run_lfp_plotting.py'], [a]]]:
+                #['lfp_simulation', ['run_lfp_simulation.py']
+                # * len(LFP_cells), lfp_arg],
+                #['lfp_postprocess', ['run_lfp_postprocess.py'], [a]],
+                #    ['lfp_plotting', ['run_lfp_plotting.py'], [a]]
+                    ]:
 
                 # LFP simulation not implemented for microcircuit
-                if (self.name_exp.rfind('microcircuit') >= 0) & (name.rfind('lfp') >= 0):
-                    continue
+                #if (self.name_exp.rfind('microcircuit') >= 0) & (name.rfind('lfp') >= 0):
+                #    continue
 
                 # key of sys_dict defining resources
                 res = (name
@@ -815,6 +816,7 @@ unset DISPLAY
                         if retval != 0:
                             raise Exception(f"os.system failed: {retval}")
                 else:
+                    print(f'JOB: bash {dir_jobscripts}/{machine}_{job}.sh')
                     retval = os.system(
                         f'bash {dir_jobscripts}/{machine}_{job}.sh')
                     if retval != 0:

@@ -131,6 +131,15 @@ class Network:
         nest.data_prefix = 'sim_'
         nest.Simulate(t_sim)
 
+        if nest.Rank() == 0:
+            ks = nest.get()
+            for k, v in ks.items():
+                if k in ["num_processes", "local_num_threads", "rng_seed", "network_size", "num_connections",
+                             "local_spike_counter",
+                             "memory_size"] or k.startswith("time_"):
+                    print(f"{k:30s}: {v}")
+                    
+
         # dump recorded spikes to HDF5 file
         self.__write_spikes(fname='spike_recorder.h5')
 
@@ -144,6 +153,8 @@ class Network:
         ----------
         fname
             Output file name. Path to raw data folder will be prepended
+
+        """
 
         """
         fn = os.path.join(self.data_dir_circuit, 'raw_data', fname)
@@ -166,7 +177,8 @@ class Network:
 
         if nest.Rank() == 0:
             f.close()
-
+        """
+        
     def __wipe(self):
         """ Wipes raw output directory from any existing files"""
         if nest.Rank() == 0:
@@ -299,6 +311,7 @@ class Network:
 
             self.pops.append(population)
 
+        """
         # write node ids to file
         if nest.Rank() == 0:
             fn = os.path.join(self.data_dir_circuit, 'raw_data',
@@ -350,7 +363,8 @@ class Network:
 
         if nest.Rank() == 0:
             f.close()
-
+        """
+            
         return
 
     def __create_recording_devices(self):
