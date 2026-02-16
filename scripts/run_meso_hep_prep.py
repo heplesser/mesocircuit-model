@@ -36,7 +36,7 @@ custom_params = parametersets.ps_dicts[params_key]
 custom_params["sim_dict"].update({"t_presim": 0.1, "t_sim": 100})
 custom_params["sim_dict"].update({"rec_dev": []})
 custom_params["net_dict"].update({"N_scaling": 0.01, "K_scaling": 0.1})
-custom_params["sys_dict"] = {"local": {"network": {"local_num_threads": 3, "n_mpi": 2}}}
+custom_params["sys_dict"] = {"local": {"network": {"local_num_threads": 5, "num_mpi": 2}}}
 
 print(50*'*')
 print(custom_params)
@@ -52,6 +52,7 @@ print(50*'*')
 # instantiated with the arguments of the existing `name` and `load=True`.
 
 meso_exp = mesoframe.MesocircuitExperiment(name, custom_params)
+
 
 ################################################################################
 # A `MesocircuitExperiment` provides an overview over all the parameter
@@ -73,6 +74,7 @@ print('-' * 50)
 # submitting batch scripts via slurm; for a local test run `machine='local'`
 # should be selected.
 
+"""
 circuit = meso_exp.circuits[0]
 circuit.run_jobs(
     jobs=[
@@ -85,3 +87,4 @@ circuit.run_jobs(
     # machine='hpc',
     machine='local'
 )
+"""

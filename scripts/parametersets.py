@@ -70,7 +70,7 @@ ps_dicts = {
         },
         'net_dict': {
             **net_dict_mesocircuit_MAMV1,
-            'N_scaling': 0.05, # 0.005,
+            'N_scaling': 0.04, # 0.005,
             'K_scaling': 1, #0.5,
         },
     },
