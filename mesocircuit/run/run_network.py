@@ -39,6 +39,7 @@ net = network.Network(circuit, local_num_threads)
 functions = [
     net.create,
     net.connect,
+    net.prepare_cleanup,
     [net.presimulate, [circuit.sim_dict['t_presim']]],
     [net.simulate, [circuit.sim_dict['t_sim']]],
 ]

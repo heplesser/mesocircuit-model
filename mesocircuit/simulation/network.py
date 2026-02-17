@@ -92,6 +92,10 @@ class Network:
         if self.net_dict['dc_input']:
             self.__connect_dc_stim_input()
 
+    def prepare_cleanup(self):
+        """To be run after connect() for force connection exchange.
+        Split out to allow timing.
+        """
         nest.Prepare()
         nest.Cleanup()
         return

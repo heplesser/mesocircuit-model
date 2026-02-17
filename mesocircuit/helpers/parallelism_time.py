@@ -4,6 +4,7 @@
 
 import time
 import numpy as np
+import nest
 
 from mpi4py import MPI
 # initialize MPI
@@ -48,6 +49,22 @@ def run_parallel_functions_sequentially(funcs, filename):
 
     COMM.Barrier()
 
+    # Simulation is done now and we add additional data by querying the kernel
+    ks = nest.get()
+    for k, v in ks.items():
+        if k in ["local_spike_counter", "memory_size"] or k.startswith("time_"):
+            try:
+                v_local = np.array([float(v)])
+                v_global = np.zeros(SIZE)
+                COMM.Allgather(v_local, v_global)
+                logtime_data.append([k, v_global])
+            except TypeError:
+                for dfun, dsuff in ((np.mean, "_mean"), (np.max, "_max")):
+                    v_local = np.array([dfun(v)])
+                    v_global = np.zeros(SIZE)
+                    COMM.Allgather(v_local, v_global)
+                    logtime_data.append([k+dsuff, v_global])
+    
     # matrix for printing results of time measurement
     num_ranks = len(logtime_data[0][1])
     rows = num_ranks + 1  # +1 for header
@@ -63,7 +80,7 @@ def run_parallel_functions_sequentially(funcs, filename):
             matrix[1:, c] = [str(np.around(t, decimals=3)) for t in times]
 
     title = 'Time measurements in s: ' + filename
-    print_table(matrix, title)
+    print_table(matrix.T, title)
 
     COMM.Barrier()
     return
@@ -259,3 +276,5 @@ def print_table(matrix, title=None, with_header=True):
 
     print(string)
     return
+
+
