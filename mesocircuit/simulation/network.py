@@ -135,7 +135,7 @@ class Network:
             ks = nest.get()
             for k, v in ks.items():
                 if k in ["num_processes", "local_num_threads", "rng_seed", "network_size", "num_connections",
-                             "local_spike_counter",
+                             "local_spike_counter", 'spike_buffer_resize_log',
                              "memory_size"] or k.startswith("time_"):
                     print(f"{k:30s}: {v}")
                     

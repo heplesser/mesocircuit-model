@@ -524,6 +524,8 @@ class Mesocircuit():
         a = '$DATA_DIR $NAME_EXP $PS_ID'
 
         for machine, dic in sys_dict.items():
+            if machine != "hpc":
+                continue
 
             # local_num_threads for network simulation
             t = str(sys_dict[machine]['network']['local_num_threads'])
@@ -533,10 +535,10 @@ class Mesocircuit():
 
             for name, scripts, scriptargs in [
                 ['network', ['run_network.py'], [t + ' ' + a]],
-                ['analysis', ['run_analysis.py'], [a]],
-                ['plotting', ['run_plotting.py'], [a]],
-                ['analysis_and_plotting', ['run_analysis.py',
-                                           'run_plotting.py'], [a] * 2],
+                #['analysis', ['run_analysis.py'], [a]],
+                #['plotting', ['run_plotting.py'], [a]],
+                #['analysis_and_plotting', ['run_analysis.py',
+                #                           'run_plotting.py'], [a] * 2],
                 #['lfp_simulation', ['run_lfp_simulation.py']
                 # * len(LFP_cells), lfp_arg],
                 #['lfp_postprocess', ['run_lfp_postprocess.py'], [a]],
@@ -548,10 +550,11 @@ class Mesocircuit():
                 #    continue
 
                 # key of sys_dict defining resources
-                res = (name
-                       if name in ['network', 'lfp_simulation',
-                                   'lfp_postprocess', 'lfp_plotting']
-                       else 'analysis_and_plotting')
+                res = "network"
+                       #(name
+                       #if name in ['network', 'lfp_simulation',
+                       #            'lfp_postprocess', 'lfp_plotting']
+                       #else 'analysis_and_plotting')
                 dic = sys_dict[machine][res]
 
                 # start jobscript
@@ -563,17 +566,40 @@ class Mesocircuit():
                     # the following could be added:
                     # export OMP_DISPLAY_ENV=VERBOSE
                     # export OMP_DISPLAY_AFFINITY=TRUE
-                    jobscript += """#SBATCH --job-name=meso
-#SBATCH --partition={}
-#SBATCH --output={}
-#SBATCH --error={}
-#SBATCH --nodes={}
-#SBATCH --ntasks-per-node={}
-#SBATCH --time={}
-export NUMEXPR_MAX_THREADS={}
-export OMP_PROC_BIND=TRUE
-export OMP_NUM_THREADS={}
+                    jobscript += """#SBATCH --job-name=meso_{_nest_binary}
+#SBATCH --partition={_partition}
+#SBATCH --output={_output}
+#SBATCH --error={_output}
+#SBATCH --nodes={_nodes}
+#SBATCH --ntasks-per-node={_n_tasks_per_node}
+#SBATCH --cpus-per-task={_cpus_per_task}
+#SBATCH --time={_time}
+#SBATCH --exclusive
+#SBATCH --mem=0
+
+set -o pipefail
+
+export NEST_BINARY={_nest_binary}
 unset DISPLAY
+module load stable/25.07 gcc ias6
+source $HOME/mesocircuit_benchmarking/vmeso/bin/activate
+source $HOME/nest/bld/${{NEST_BINARY}}_meso/install/bin/nest_vars.sh
+
+export CPU_BIND_MASK="$(python3 $HOME/mesocircuit_benchmarking/mesocircuit-model/scripts/pinning_mask.py 2 64)"
+
+export OMP_NUM_THREADS={_cpus_per_task}
+export OMP_PROC_BIND=spread
+export OMP_PLACES=threads
+
+export OMP_DISPLAY_ENV=VERBOSE
+export OMP_DISPLAY_AFFINITY=TRUE
+
+export KMP_AFFINITY=verbose,balanced
+
+# Avoid problems from numexpr Python package
+export NUMEXPR_MAX_THREADS=$OMP_NUM_THREADS
+
+source jemalloc.sh
 """
 
                     if name == 'network':
@@ -583,6 +609,7 @@ unset DISPLAY
                         # "which jemalloc" executed on the command line returns
                         # something like
                         # '/p/software/jurecadc/stages/2022/software/jemalloc/5.2.1-GCCcore-11.2.0/bin/jemalloc.sh'
+                        """
                         try:
                             which_jemalloc = subprocess.check_output(
                                 ["which", "jemalloc.sh"]).decode(sys.stdout.encoding).strip()
@@ -594,12 +621,14 @@ unset DISPLAY
                         except:
                             print(
                                 "LD_PRELOAD skipped because jemalloc is not in PATH.")
-
-                    if name in ['lfp_simulation', 'lfp_postprocess', 'lfp_plotting']:
-                        run_cmd = f'srun'
-                    else:
-                        run_cmd = f'srun --cpus-per-task={dic["local_num_threads"]} --threads-per-core=1 --cpu-bind=rank'
-
+                        """
+                        
+                    #if name in ['lfp_simulation', 'lfp_postprocess', 'lfp_plotting']:
+                    #    run_cmd = f'srun'
+                    #else:
+                    #    run_cmd = f'srun --cpus-per-task={dic["local_num_threads"]} --threads-per-core=1 --cpu-bind=rank'
+                    run_cmd = "srun"
+                    
                 elif machine == 'local':
                     # check which executables are available
                     for mpiexec in ['srun', 'mpiexec', 'mpirun']:
@@ -618,7 +647,7 @@ unset DISPLAY
                     raise NotImplementedError(
                         f'machine {machine} not recognized')
 
-                jobscript += "set -o pipefail\n"
+                #jobscript += "set -o pipefail\n"
                 jobscript += f"RUN_PATH={run_path}\n"
                 jobscript += f"DATA_DIR={self.data_dir}\n"
                 jobscript += f"NAME_EXP={self.name_exp}\n"
@@ -627,8 +656,9 @@ unset DISPLAY
                 # file for output and errors (for batch scripts of hpc the
                 # evalutated path is needed)
                 stdout = f"$DATA_DIR/$NAME_EXP/$PS_ID/stdout/{name}.txt"
+                print("before stdouthpc", dic)
                 stdout_hpc = os.path.join(
-                    self.data_dir_circuit, 'stdout', name + '.txt')
+                    self.data_dir_circuit, 'stdout', name + f'_{dic["nest_binary"]}_%j.txt')
 
                 # append executable(s),
                 # tee output to file for local execution (append for multiple jobs)
@@ -694,7 +724,8 @@ unset DISPLAY
                                 dic['num_mpi_per_node'],
                                 wt,  # dic['wall_clock_time']
                                 dic['max_num_cores'],
-                                dic['local_num_threads']
+                                dic['local_num_threads'],
+                                dic["nest_binary"]
                             )
                         y = arg.split(' ')[0]
                         y = y.replace('(', '').replace(')', '')
@@ -706,20 +737,20 @@ unset DISPLAY
                 else:
                     jobscript += sep.join(executables)
                     if machine == 'hpc':
+                        print(dic)
                         jobscript = jobscript.format(
-                            dic['partition'],
-                            stdout_hpc,
-                            stdout_hpc,
-                            dic['num_nodes'],
-                            dic['num_mpi_per_node'],
-                            dic['wall_clock_time'],
-                            dic['max_num_cores'],
-                            dic['local_num_threads']
+                            _partition=dic['partition'],
+                            _output=stdout_hpc,
+                            _nodes=dic['num_nodes'],
+                            _n_tasks_per_node=dic['num_mpi_per_node'],
+                            _time=dic['wall_clock_time'],
+                            _cpus_per_task=dic['local_num_threads'],
+                            _nest_binary=dic['nest_binary']
                         )
 
                     # write jobscript
                     fname = os.path.join(path, 'jobscripts',
-                                         f"{machine}_{name}.sh")
+                                         f"{machine}_{name}_{dic['nest_binary']}.sh")
                     with open(fname, 'w') as f:
                         f.write(jobscript)
         return

@@ -28,17 +28,17 @@ import parametersets
 # choices. These models base on the original microcircuit
 # (Potjans and Diesmann, 2014) and are downscaled for execution on a laptop.
 
-name = 'local_mesocircuit_MAMV1'
+name = 'mesocircuit_MAMV1'
 # name = 'local_mesocircuit_PD'
 params_key = name
 custom_params = parametersets.ps_dicts[params_key]
 
-custom_params["sim_dict"].update({"t_presim": 0.1, "t_sim": 100})
+custom_params["sim_dict"] = {"t_presim": 0.1, "t_sim": 10000}
 custom_params["sim_dict"].update({"rec_dev": []})
-custom_params["net_dict"].update({"N_scaling": 0.2, "K_scaling": 0.1})
 custom_params["sys_dict"] = {"hpc": {"network": {"local_num_threads": 64, "num_mpi": 2,
-                                                 "num_nodes": 1, "partition": "hamsteinZen3",
-                                                 "nest_binary": "png_meso"}}}
+                                                 "num_nodes": 4, "partition": "hamsteinZen3",
+                                                 "nest_binary": "png",
+                                                 'wall_clock_time': '01:00:00'}}}
 
 print(50*'*')
 print(custom_params)
@@ -55,6 +55,7 @@ print(50*'*')
 
 meso_exp = mesoframe.MesocircuitExperiment(name, custom_params)
 
+
 ################################################################################
 # A `MesocircuitExperiment` provides an overview over all the parameter
 # combinations it is holding (`parameterview`) and a list of all the individual
@@ -66,24 +67,3 @@ print('-' * 50)
 print(meso_exp.circuits)
 print('-' * 50)
 
-################################################################################
-# For each Mesocircuit jobs can finally be launched.
-# All provided jobs are run one after the other. `analysis_and_plotting` is for
-# convenience combined into one job, but `analysis` and `plotting` can also be
-# handled as individual jobs.
-# For running the full model on an HPC cluster, `machine='hpc'` is required for
-# submitting batch scripts via slurm; for a local test run `machine='local'`
-# should be selected.
-
-circuit = meso_exp.circuits[0]
-circuit.run_jobs(
-    jobs=[
-        'network',
-        #'analysis_and_plotting',
-        # 'lfp_simulation',
-        # 'lfp_postprocess',
-        # 'lfp_plotting',
-    ],
-    machine='hpc',
-    #machine='local'
-)
