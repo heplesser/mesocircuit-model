@@ -48,4 +48,4 @@ functions = [
 # The defined functions are inherently parallel and we execute each one of them
 # after the other.
 
-pt.run_parallel_functions_sequentially(functions, os.path.basename(__file__))
+pt.run_parallel_functions_sequentially(functions, os.path.basename(__file__), net)

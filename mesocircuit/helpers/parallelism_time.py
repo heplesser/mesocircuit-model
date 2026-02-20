@@ -13,7 +13,7 @@ SIZE = COMM.Get_size()
 RANK = COMM.Get_rank()
 
 
-def run_parallel_functions_sequentially(funcs, filename):
+def run_parallel_functions_sequentially(funcs, filename, net=None):
     '''
     Runs parallelized functions one ofter the other and measures time.
 
@@ -26,6 +26,8 @@ def run_parallel_functions_sequentially(funcs, filename):
         elements are function names and the second a list of arguments.
     filename
         Name of the file calling the function.
+    net
+        Network object to transfer logging info
     '''
     logtime_data = []
 
@@ -49,6 +51,22 @@ def run_parallel_functions_sequentially(funcs, filename):
 
     COMM.Barrier()
 
+    # Fudge to get timings of individual connect calls from each rank
+    if net:
+        local_cct = np.array(net._bench_conn_call_times)
+        global_cct = np.zeros(SIZE * len(local_cct))
+        COMM.Allgather(local_cct, global_cct)
+        COMM.Barrier()
+        if RANK == 0:
+            mat_cct = global_cct.reshape((SIZE, len(local_cct)))
+            print()
+            print("-" * 50)
+            print("PyTimes for Connect calls")
+            print("-" * 50)
+            print(repr(mat_cct.T))
+            print("-" * 50)
+            print()
+
     # Simulation is done now and we add additional data by querying the kernel
     ks = nest.get()
     for k, v in ks.items():
@@ -64,7 +82,21 @@ def run_parallel_functions_sequentially(funcs, filename):
                     v_global = np.zeros(SIZE)
                     COMM.Allgather(v_local, v_global)
                     logtime_data.append([k+dsuff, v_global])
-    
+                # now also print all
+                local_cct = v
+                global_cct = np.zeros(SIZE * len(local_cct))
+                COMM.Allgather(local_cct, global_cct)
+                COMM.Barrier()
+                if RANK == 0:
+                    mat_cct = global_cct.reshape((SIZE, len(local_cct)))
+                    print()
+                    print("-" * 50)
+                    print(f"Thread-parallel timer {k}")
+                    print("-" * 50)
+                    print(repr(mat_cct.T))
+                    print("-" * 50)
+                    print()
+                
     # matrix for printing results of time measurement
     num_ranks = len(logtime_data[0][1])
     rows = num_ranks + 1  # +1 for header

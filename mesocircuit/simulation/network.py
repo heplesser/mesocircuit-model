@@ -15,6 +15,7 @@ import nest
 from mpi4py import MPI
 from mesocircuit.helpers.mpiops import GathervRecordArray
 import multiprocessing as mp
+import time
 
 
 class Network:
@@ -499,6 +500,8 @@ class Network:
         if nest.Rank() == 0:
             print('Connecting neuronal populations recurrently.')
 
+        self._bench_conn_call_times = []
+        
         for i, target_pop in enumerate(
                 self.pops[:-1]):  # thalamus is no target
             for j, source_pop in enumerate(self.pops):
@@ -595,10 +598,12 @@ class Network:
                     # a pair of neurons
                     for repeat in np.arange(
                             self.net_dict['repeat_connect'][i][j]):
+                        start_conn = time.time()
                         nest.Connect(
                             source_pop, target_pop,
                             conn_spec=conn_dict_rec,
                             syn_spec=syn_dict)
+                        self._bench_conn_call_times.append(time.time() - start_conn)
         return
 
     def __connect_recording_devices(self):

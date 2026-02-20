@@ -2,6 +2,13 @@
 
 Hans Ekkehard Plesser, 2026-02-17
 
+## my_sw (Stopwatch)
+
+This version is for use with the png-sw branch of NEST (heplesser), which provides additional stopwatches for spatial connection creation.
+
+Stopwatch data are read written to stdout.
+Also collects timings for individual Connect() calls from Python level and writes to stdout.
+
 ## Preparations and NEST builds
 
 ### Front end node
