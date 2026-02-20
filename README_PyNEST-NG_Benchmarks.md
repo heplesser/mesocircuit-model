@@ -2,7 +2,9 @@
 
 Hans Ekkehard Plesser, 2026-02-17
 
-## my_sw (Stopwatch)
+## my_sw_flat (Stopwatch, flat probability)
+
+This version uses a fixed probability inside the mask to differentiate mask costs from random number costs.
 
 This version is for use with the png-sw branch of NEST (heplesser), which provides additional stopwatches for spatial connection creation.
 

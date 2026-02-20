@@ -528,10 +528,7 @@ class Network:
                     elif self.net_dict['connect_method'] == 'distr_indegree_exp':
                         conn_dict_rec = {
                             'rule': 'pairwise_bernoulli',
-                            'p': self.net_dict['p0'][i][j] *
-                            nest.spatial_distributions.exponential(
-                                    x=nest.spatial.distance,
-                                    beta=self.net_dict['beta'][i][j]),
+                            'p': 0.077 * self.net_dict['p0'][i][j],
                             'mask': {'circular': {
                                 'radius': self.net_dict['mask_radius'][i][j]}}}
                     elif self.net_dict['connect_method'] == 'distr_indegree_gauss':
