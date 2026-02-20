@@ -598,7 +598,8 @@ class Network:
                         nest.Connect(
                             source_pop, target_pop,
                             conn_spec=conn_dict_rec,
-                            syn_spec=syn_dict)
+                        #    syn_spec=syn_dict
+                        )
         return
 
     def __connect_recording_devices(self):
@@ -630,7 +631,8 @@ class Network:
             nest.Connect(
                 self.poisson_bg_input[i], target_pop,
                 conn_spec=conn_dict_poisson,
-                syn_spec=syn_dict_poisson)
+            #    syn_spec=syn_dict_poisson
+            )
         return
 
     def __connect_thalamic_stim_input(self):
@@ -651,7 +653,8 @@ class Network:
 
             nest.Connect(self.spike_pulse_input_th, self.pops[-1],
                          conn_spec=conn_dict_pulse_th,
-                         syn_spec=syn_dict_pulse_th)
+                         #syn_spec=syn_dict_pulse_th
+                         )
         return
 
     def __connect_dc_stim_input(self):

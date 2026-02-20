@@ -2,6 +2,10 @@
 
 Hans Ekkehard Plesser, 2026-02-17
 
+## my_plain_syn
+
+Do not parametrize synapses
+
 ## Preparations and NEST builds
 
 ### Front end node
