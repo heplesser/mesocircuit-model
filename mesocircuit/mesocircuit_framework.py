@@ -583,7 +583,7 @@ export NEST_BINARY={_nest_binary}
 unset DISPLAY
 module load stable/25.07 gcc ias6
 source $HOME/mesocircuit_benchmarking/vmeso_sw_flat/bin/activate
-source $HOME/nest/bld/${{NEST_BINARY}}_meso_sw_flat/install/bin/nest_vars.sh
+source $HOME/nest/bld/${{NEST_BINARY}}_meso_sw/install/bin/nest_vars.sh
 
 export CPU_BIND_MASK="$(python3 $HOME/mesocircuit_benchmarking/mesocircuit-model/scripts/pinning_mask.py 2 64)"
 
