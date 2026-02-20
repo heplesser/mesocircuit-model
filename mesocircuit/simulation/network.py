@@ -517,21 +517,25 @@ class Network:
                         conn_dict_rec = {
                             'rule': 'fixed_indegree',
                             'indegree': self.net_dict['indegrees'][i][j],
-                            'p': nest.spatial_distributions.exponential(
-                                x=nest.spatial.distance,
-                                beta=self.net_dict['beta'][i][j]),
-                            'mask': {'circular': {
-                                'radius': self.net_dict['mask_radius'][i][j]}}}
+                            #'p': nest.spatial_distributions.exponential(
+                            #    x=nest.spatial.distance,
+                            #    beta=self.net_dict['beta'][i][j]),
+                            #'mask': {'circular': {
+                            #    'radius': self.net_dict['mask_radius'][i][j]}}
+                        }
                     elif self.net_dict['connect_method'] == 'distr_indegree_exp':
                         conn_dict_rec = {
                             'rule': 'pairwise_bernoulli',
-                            'p': self.net_dict['p0'][i][j] *
-                            nest.spatial_distributions.exponential(
-                                    x=nest.spatial.distance,
-                                    beta=self.net_dict['beta'][i][j]),
-                            'mask': {'circular': {
-                                'radius': self.net_dict['mask_radius'][i][j]}}}
+                            'p': 0.0002,
+                            #'p': self.net_dict['p0'][i][j] *
+                            #nest.spatial_distributions.exponential(
+                            #        x=nest.spatial.distance,
+                            #        beta=self.net_dict['beta'][i][j]),
+                            #'mask': {'circular': {
+                            #    'radius': self.net_dict['mask_radius'][i][j]}}
+                        }
                     elif self.net_dict['connect_method'] == 'distr_indegree_gauss':
+                        assert False
                         conn_dict_rec = {
                             'rule': 'pairwise_bernoulli',
                             'p': self.net_dict['p0'][i][j] *
@@ -642,6 +646,7 @@ class Network:
         if self.net_dict['thalamic_input_type'] == 'poisson':
             nest.Connect(self.poisson_input_th, self.pops[-1])
         elif self.net_dict['thalamic_input_type'] == 'pulses':
+            assert False
             conn_dict_pulse_th = {
                 'rule': 'pairwise_bernoulli',
                 'p': 1.0,

@@ -2,6 +2,11 @@
 
 Hans Ekkehard Plesser, 2026-02-17
 
+
+## nospatial
+
+Do not use spatial connectivity but plain Bernoulli. p is estimated, fewer connections created than for mesoscircuit proper.
+
 ## Preparations and NEST builds
 
 ### Front end node
