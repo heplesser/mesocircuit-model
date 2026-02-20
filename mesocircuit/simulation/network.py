@@ -499,9 +499,10 @@ class Network:
         if nest.Rank() == 0:
             print('Connecting neuronal populations recurrently.')
 
-        for i, target_pop in enumerate(
+        for j, source_pop in enumerate(self.pops):
+            for i, target_pop in enumerate(
                 self.pops[:-1]):  # thalamus is no target
-            for j, source_pop in enumerate(self.pops):
+
                 if self.net_dict['num_synapses'][i][j] >= 0.:
 
                     # specify which connections exist
